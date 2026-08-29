@@ -24,9 +24,9 @@ jobs:
           base64 -d deploy4/avatar_aura.patch.gz.b64 > /tmp/avatar_aura.patch.gz
           gzip -dc /tmp/avatar_aura.patch.gz > /tmp/avatar_aura.patch
           git apply /tmp/avatar_aura.patch
-          grep -q 'profile-avatar-img' index.html
-          grep -q 'profileImage' index.html
-          grep -q 'profileImageZoom' index.html
+          grep -q 'brandAvatarImg' index.html
+          grep -q 'profilePhotoInput' index.html
+          grep -q 'avatarViewOverlay' index.html
           grep -q 'aura-dual' index.html
           grep -q 'auraOrbit' index.html
           grep -q 'focus-within' index.html
