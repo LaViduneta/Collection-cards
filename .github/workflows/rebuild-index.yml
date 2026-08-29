@@ -1,11 +1,11 @@
-name: Apply UI patch
+name: Apply ID patch
 
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/rebuild-index.yml'
-      - 'deploy4/avatar_aura.patch.gz.b64'
+      - 'deploy5/id6.patch.gz.b64'
 
 permissions:
   contents: write
@@ -17,19 +17,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Apply avatar and aura patch
+      - name: Apply six-character ID patch
         shell: bash
         run: |
           set -euo pipefail
-          base64 -d deploy4/avatar_aura.patch.gz.b64 > /tmp/avatar_aura.patch.gz
-          gzip -dc /tmp/avatar_aura.patch.gz > /tmp/avatar_aura.patch
-          git apply /tmp/avatar_aura.patch
-          grep -q 'brandAvatarImg' index.html
-          grep -q 'profilePhotoInput' index.html
-          grep -q 'avatarViewOverlay' index.html
-          grep -q 'aura-dual' index.html
-          grep -q 'auraOrbit' index.html
-          grep -q 'focus-within' index.html
+          base64 -d deploy5/id6.patch.gz.b64 > /tmp/id6.patch.gz
+          gzip -dc /tmp/id6.patch.gz > /tmp/id6.patch
+          git apply /tmp/id6.patch
+          grep -q 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' index.html
+          grep -q 'length:6' index.html
 
       - name: Commit updated index
         shell: bash
@@ -42,5 +38,5 @@ jobs:
             echo 'No changes to commit.'
             exit 0
           fi
-          git commit -m 'Agregar avatar de perfil y aura animada al buscador'
+          git commit -m 'Usar IDs alfanumericos de seis caracteres'
           git push
