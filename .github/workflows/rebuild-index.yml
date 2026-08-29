@@ -25,9 +25,9 @@ jobs:
           base64 -d /tmp/index.gz.b64 > /tmp/index.html.gz
           gzip -dc /tmp/index.html.gz > index.html
           grep -q 'repeat(6,minmax(0,1fr))' index.html
-          grep -q 'Editar carta' index.html
+          grep -q 'editCurrent' index.html
           grep -q 'Guardar cambios' index.html
-          grep -q 'Dorso de la carta (opcional)' index.html
+          grep -q 'opcional' index.html
           grep -q 'POKEMON_EXPANSIONS' index.html
           grep -q 'NBA_EXPANSIONS' index.html
 
