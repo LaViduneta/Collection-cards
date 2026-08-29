@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/rebuild-index.yml'
-      - 'deploy2/part*.txt'
+      - 'deploy3/part*.txt'
 
 permissions:
   contents: write
@@ -21,17 +21,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat deploy2/part01.txt deploy2/part02.txt deploy2/part03.txt deploy2/part04.txt deploy2/part05.txt deploy2/part06.txt deploy2/part07.txt deploy2/part08.txt deploy2/part09.txt deploy2/part10.txt > /tmp/index.gz.b64
+          cat deploy3/part01.txt deploy3/part02.txt deploy3/part03.txt deploy3/part04.txt deploy3/part05.txt deploy3/part06.txt > /tmp/index.gz.b64
           base64 -d /tmp/index.gz.b64 > /tmp/index.html.gz
           gzip -dc /tmp/index.html.gz > index.html
+          grep -q 'repeat(6,minmax(0,1fr))' index.html
+          grep -q 'Editar carta' index.html
+          grep -q 'Guardar cambios' index.html
+          grep -q 'Dorso de la carta (opcional)' index.html
           grep -q 'POKEMON_EXPANSIONS' index.html
           grep -q 'NBA_EXPANSIONS' index.html
-          grep -q 'Topps Basketball 2025-26' index.html
-          grep -q 'Panini National Treasures 2009-10' index.html
-          grep -q 'repeat(4,minmax(0,1fr))' index.html
-          grep -q 'Eliminar fondo con IA' index.html
-          grep -q 'BEN2' index.html
-          grep -q 'Mega Evolution Series' index.html
 
       - name: Commit rebuilt index
         shell: bash
@@ -44,5 +42,5 @@ jobs:
             echo 'No changes to commit.'
             exit 0
           fi
-          git commit -m 'Aplicar correcciones de colección, persistencia e IA'
+          git commit -m 'Agregar grilla de seis cartas, dorso opcional y edición'
           git push
