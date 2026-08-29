@@ -72,7 +72,23 @@ img{max-width:100%}
 .topbar-wrap{position:sticky;top:0;z-index:30;background:rgba(20,20,20,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
 .topbar{width:min(1450px,94vw);min-height:68px;margin:auto;display:flex;align-items:center;gap:14px}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
-.brand-mark{width:38px;height:38px;border:1px solid var(--line);border-radius:11px;display:grid;place-items:center;font-weight:950}
+.brand-mark{width:38px;height:38px;border:1px solid var(--line);border-radius:11px;display:grid;place-items:center;font-weight:950;overflow:hidden;cursor:pointer;background:#202020;color:#fff;flex:0 0 38px}
+.brand-mark.avatar .w-24{width:100%;height:100%;border-radius:11px;overflow:hidden}
+.brand-mark.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-photo-field{grid-column:1/-1;border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(18,18,18,.45)}
+.profile-photo-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.profile-photo-preview{width:64px;height:64px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#1c1c1c;display:grid;place-items:center;font-weight:950;color:#fff}
+.profile-photo-preview img{width:100%;height:100%;object-fit:cover}
+.profile-photo-tools{display:flex;gap:8px;flex-wrap:wrap}
+.profile-crop-stage{position:relative;width:min(320px,80vw);aspect-ratio:1/1;margin:16px auto;border-radius:20px;overflow:hidden;background:#0d0d0d;border:1px solid var(--line);touch-action:none;cursor:grab}
+.profile-crop-stage.dragging{cursor:grabbing}
+.profile-crop-stage img{position:absolute;left:50%;top:50%;max-width:none;max-height:none;user-select:none;pointer-events:none;transform-origin:center center}
+.profile-crop-guide{position:absolute;inset:0;border:2px solid rgba(255,255,255,.5);border-radius:20px;box-shadow:inset 0 0 0 999px rgba(0,0,0,.12);pointer-events:none}
+.profile-crop-controls{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin-top:8px}
+.profile-crop-controls input{width:100%}
+.profile-avatar-modal{width:min(420px,92vw)!important;text-align:center}
+.profile-avatar-large{width:min(280px,68vw);aspect-ratio:1/1;margin:0 auto;border-radius:26px;overflow:hidden;background:#1b1b1b;border:1px solid var(--line);display:grid;place-items:center;font-size:70px;font-weight:950}
+.profile-avatar-large img{width:100%;height:100%;object-fit:cover}
 .brand-profile{display:flex;flex-direction:column;line-height:1.05;min-width:0}
 .brand-profile strong{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .brand-profile small{font-size:10px;color:#888;letter-spacing:.1em;margin-top:4px}
@@ -81,7 +97,16 @@ img{max-width:100%}
   border:1px solid var(--line);background:#252525;color:#eee;border-radius:999px;padding:9px 13px;font-weight:850;font-size:13px
 }
 .nav button.active,.nav button:hover,.pill:hover{background:#eee;color:#111}
-.user-search{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;background:#1e1e1e;padding:4px 5px 4px 11px}
+@property --aura-angle{syntax:"<angle>";initial-value:0deg;inherits:false}
+.user-search{position:relative;display:block;border-radius:999px;padding:2px;background:transparent;isolation:isolate}
+.user-search.aura-dual::before,.user-search.aura-dual::after{content:"";position:absolute;inset:-2px;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .2s ease}
+.user-search.aura-dual::before{z-index:-1;background:conic-gradient(from var(--aura-angle),transparent 0deg,rgba(255,255,255,.16) 55deg,rgba(255,255,255,.98) 92deg,rgba(175,175,175,.72) 128deg,transparent 175deg,transparent 250deg,rgba(235,235,235,.8) 300deg,transparent 360deg);animation:auraOrbit 2.2s linear infinite}
+.user-search.aura-dual::after{inset:-4px;z-index:-2;background:conic-gradient(from var(--aura-angle),transparent 0deg,rgba(255,255,255,.55) 82deg,transparent 150deg,transparent 265deg,rgba(210,210,210,.42) 315deg,transparent 360deg);filter:blur(8px);animation:auraOrbit 2.2s linear infinite}
+.user-search.aura-dual:focus-within::before{opacity:1}
+.user-search.aura-dual:focus-within::after{opacity:.72}
+@keyframes auraOrbit{to{--aura-angle:360deg}}
+.user-search .card{position:relative;z-index:1;border-radius:999px;background:#1e1e1e;overflow:hidden}
+.user-search .card-body{display:flex;align-items:center;gap:5px;padding:4px 5px 4px 11px}
 .user-search input{width:90px;background:transparent;border:0;outline:0;color:#fff;font-weight:800;font-size:12px}
 .user-search button{border:0;background:#2b2b2b;color:#eee;border-radius:999px;padding:7px 9px;font-weight:850;font-size:11px}
 
@@ -323,8 +348,14 @@ label{display:block;font-size:13px;font-weight:800;color:#d8d8d8;margin-bottom:8
 
 <div class="topbar-wrap">
   <div class="topbar">
-    <div class="brand"><div class="brand-mark">MC</div><div class="brand-profile"><strong id="barName">My Collection</strong><small id="barId">Colección de cartas</small></div></div>
-    <div class="user-search"><span style="color:#888;font-weight:900">#</span><input id="findId" inputmode="numeric" placeholder="ID usuario"><button id="findBtn">Ver</button></div>
+    <div class="brand"><div class="brand-mark avatar" id="brandAvatar" title="Ver foto de perfil"><div class="w-24 rounded-xl" id="brandAvatarInner"><span id="brandAvatarFallback">MC</span><img id="brandAvatarImg" alt="Foto de perfil" class="hidden"></div></div><div class="brand-profile"><strong id="barName">My Collection</strong><small id="barId">Colección de cartas</small></div></div>
+    <div class="user-search aura aura-dual">
+      <div class="card bg-base-100">
+        <div class="card-body">
+          <span style="color:#888;font-weight:900">#</span><input id="findId" inputmode="numeric" placeholder="ID usuario"><button id="findBtn">Ver</button>
+        </div>
+      </div>
+    </div>
     <nav class="nav">
       <button class="active" data-view="home">Inicio</button>
       <button data-view="add" id="addNav">Agregar carta</button>
@@ -421,6 +452,17 @@ label{display:block;font-size:13px;font-weight:800;color:#d8d8d8;margin-bottom:8
 <div class="overlay" id="settingsOverlay"><div class="glass-box settings-box">
   <div class="modal-top"><h2>Editar banner</h2><button class="close" id="closeSettings">×</button></div>
   <div class="settings-grid">
+    <div class="profile-photo-field">
+      <label>Foto de perfil</label>
+      <div class="profile-photo-row">
+        <div class="profile-photo-preview" id="settingsAvatarPreview"><span>MC</span></div>
+        <div class="profile-photo-tools">
+          <label class="ghost" style="display:inline-flex;align-items:center;cursor:pointer">Cambiar foto<input class="file-hidden" id="profilePhotoInput" type="file" accept="image/*"></label>
+          <button class="ghost" id="removeProfilePhoto" type="button">Quitar foto</button>
+        </div>
+      </div>
+      <div class="hint">Podés centrar la imagen manualmente y ajustar el zoom antes de guardarla.</div>
+    </div>
     <div><label>Nombre visible</label><input id="editName" maxlength="24"></div>
     <div><label>ID único</label><input id="editId" class="id-locked" disabled></div>
     <div><label>Tipografía</label><select id="fontSelect">
@@ -450,6 +492,24 @@ label{display:block;font-size:13px;font-weight:800;color:#d8d8d8;margin-bottom:8
   </div>
   <div class="settings-actions"><button class="ghost" id="settingsCancel">Cancelar</button><button class="cta" id="settingsSave">Guardar cambios</button></div>
   <button class="danger full" id="logoutBtn">Generar otro usuario prototipo</button>
+</div></div>
+
+<!-- PROFILE PHOTO EDITOR -->
+<div class="overlay" id="profilePhotoOverlay"><div class="glass-box">
+  <div class="modal-top"><h2>Ajustar foto de perfil</h2><button class="close" id="profilePhotoX">×</button></div>
+  <div class="profile-crop-stage" id="profileCropStage">
+    <img id="profileCropImg" alt="Ajustar foto de perfil">
+    <div class="profile-crop-guide"></div>
+  </div>
+  <div class="profile-crop-controls"><span>−</span><input id="profileZoom" type="range" min="1" max="3" step="0.01" value="1"><span>+</span></div>
+  <div class="hint" style="text-align:center">Arrastrá la imagen para centrarla y usá el control para acercar o alejar.</div>
+  <div class="settings-actions"><button class="ghost" id="profilePhotoCancel" type="button">Cancelar</button><button class="cta" id="profilePhotoApply" type="button">Usar foto</button></div>
+</div></div>
+
+<!-- PROFILE AVATAR VIEW -->
+<div class="overlay" id="avatarViewOverlay"><div class="glass-box profile-avatar-modal">
+  <div class="modal-top"><h2>Foto de perfil</h2><button class="close" id="avatarViewX">×</button></div>
+  <div class="profile-avatar-large" id="avatarViewLarge"><span>MC</span></div>
 </div></div>
 
 <!-- IMAGE PREVIEW / BACKGROUND REMOVAL -->
@@ -516,7 +576,8 @@ function ensurePrototypeProfile(){
     size:56,
     font:'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
     outline:false,
-    shadow:true
+    shadow:true,
+    avatar:""
   };
   putProfile(p);
   return p;
@@ -558,10 +619,13 @@ $$(".nav button").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
 
 function applyProfile(){
   if(!viewUser){
+    $("#brandAvatarImg").removeAttribute("src");$("#brandAvatarImg").classList.add("hidden");$("#brandAvatarFallback").classList.remove("hidden");
     document.documentElement.style.setProperty("--hero-a","#1b1b1b");document.documentElement.style.setProperty("--hero-b","#0e0e0e");document.documentElement.style.setProperty("--hero-c","#241216");
     $("#heroName").textContent="My Collection";$("#heroId").textContent="Explorá y organizá tus cartas";$("#barName").textContent="My Collection";$("#barId").textContent="Colección de cartas";$("#heroEdit").classList.add("hidden");$("#viewingBanner").classList.remove("show");$("#collectionTitle").textContent="Colecciones";renderHero();render();return
   }
   let p=viewUser,g=p.gradient||["#1b1b1b","#0e0e0e","#241216"];
+  const avatarImg=$("#brandAvatarImg"),avatarFallback=$("#brandAvatarFallback");
+  if(p.avatar){avatarImg.src=p.avatar;avatarImg.classList.remove("hidden");avatarFallback.classList.add("hidden")}else{avatarImg.removeAttribute("src");avatarImg.classList.add("hidden");avatarFallback.classList.remove("hidden")}
   document.documentElement.style.setProperty("--hero-a",g[0]);document.documentElement.style.setProperty("--hero-b",g[1]);document.documentElement.style.setProperty("--hero-c",g[2]||g[1]);
   document.documentElement.style.setProperty("--hero-name",p.color||"#fff");document.documentElement.style.setProperty("--hero-size",(p.size||56)+"px");
   document.documentElement.style.setProperty("--hero-font",p.font||'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif');
@@ -653,14 +717,48 @@ function openEditCard(id){
 $("#closeCardModal").onclick=()=>$("#cardModal").classList.remove("open");$("#cardModal").onclick=e=>{if(e.target===$("#cardModal"))$("#cardModal").classList.remove("open")};
 
 /* Banner settings via pencil */
+let pendingProfileAvatar="",profilePhotoSource="",profileZoom=1,profileOffsetX=0,profileOffsetY=0,profileDrag=null,profileImgNatural={w:1,h:1};
+function updateSettingsAvatarPreview(src){
+  pendingProfileAvatar=src||"";const box=$("#settingsAvatarPreview");box.innerHTML=src?`<img src="${src}" alt="Foto de perfil">`:`<span>MC</span>`;
+}
+function renderProfileCrop(){
+  const img=$("#profileCropImg"),stage=$("#profileCropStage");if(!img.src||!stage.clientWidth)return;
+  const side=stage.clientWidth,base=Math.max(side/profileImgNatural.w,side/profileImgNatural.h);
+  const w=profileImgNatural.w*base*profileZoom,h=profileImgNatural.h*base*profileZoom;
+  img.style.width=w+"px";img.style.height=h+"px";img.style.transform=`translate(calc(-50% + ${profileOffsetX}px),calc(-50% + ${profileOffsetY}px))`;
+}
+function openProfilePhotoEditor(src){
+  profilePhotoSource=src;profileZoom=1;profileOffsetX=0;profileOffsetY=0;$("#profileZoom").value="1";
+  const img=$("#profileCropImg");img.onload=()=>{profileImgNatural={w:img.naturalWidth||1,h:img.naturalHeight||1};renderProfileCrop()};img.src=src;$("#profilePhotoOverlay").classList.add("open");
+}
+$("#profilePhotoInput").onchange=e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>openProfilePhotoEditor(r.result);r.readAsDataURL(f);e.target.value=""};
+$("#profileZoom").oninput=e=>{profileZoom=+e.target.value;renderProfileCrop()};
+$("#profileCropStage").onpointerdown=e=>{profileDrag={x:e.clientX,y:e.clientY,ox:profileOffsetX,oy:profileOffsetY};e.currentTarget.setPointerCapture(e.pointerId);e.currentTarget.classList.add("dragging")};
+$("#profileCropStage").onpointermove=e=>{if(!profileDrag)return;profileOffsetX=profileDrag.ox+(e.clientX-profileDrag.x);profileOffsetY=profileDrag.oy+(e.clientY-profileDrag.y);renderProfileCrop()};
+$("#profileCropStage").onpointerup=$("#profileCropStage").onpointercancel=e=>{profileDrag=null;e.currentTarget.classList.remove("dragging")};
+function closeProfileEditor(){$("#profilePhotoOverlay").classList.remove("open")}
+$("#profilePhotoX").onclick=$("#profilePhotoCancel").onclick=closeProfileEditor;
+$("#profilePhotoApply").onclick=()=>{
+  const stage=$("#profileCropStage"),img=$("#profileCropImg"),side=stage.clientWidth||320,canvas=document.createElement("canvas");canvas.width=512;canvas.height=512;const ctx=canvas.getContext("2d");
+  const scale=512/side,w=parseFloat(img.style.width)||side,h=parseFloat(img.style.height)||side;ctx.drawImage(img,(side/2-w/2+profileOffsetX)*scale,(side/2-h/2+profileOffsetY)*scale,w*scale,h*scale);
+  updateSettingsAvatarPreview(canvas.toDataURL("image/jpeg",.9));closeProfileEditor();
+};
+$("#removeProfilePhoto").onclick=()=>updateSettingsAvatarPreview("");
+$("#brandAvatar").onclick=()=>{
+  const src=viewUser?.avatar||"",box=$("#avatarViewLarge");box.innerHTML=src?`<img src="${src}" alt="Foto de perfil">`:`<span>MC</span>`;$("#avatarViewOverlay").classList.add("open");
+};
+$("#avatarViewX").onclick=()=>$("#avatarViewOverlay").classList.remove("open");
+$("#avatarViewOverlay").onclick=e=>{if(e.target.id==="avatarViewOverlay")$("#avatarViewOverlay").classList.remove("open")};
+window.addEventListener("resize",()=>{if($("#profilePhotoOverlay").classList.contains("open"))renderProfileCrop()});
+
 function openSettings(){
-  if(!own())return;let p=me;$("#editName").value=p.name;$("#editId").value="#"+p.id;$("#fontSelect").value=p.font||'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';$("#nameSize").value=p.size||56;$("#sizeLabel").textContent=(p.size||56)+" px";$("#nameColor").value=p.color||"#ffffff";
+  if(!own())return;let p=me;updateSettingsAvatarPreview(p.avatar||"");$("#editName").value=p.name;$("#editId").value="#"+p.id;$("#fontSelect").value=p.font||'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';$("#nameSize").value=p.size||56;$("#sizeLabel").textContent=(p.size||56)+" px";$("#nameColor").value=p.color||"#ffffff";
   $("#outlineToggle").classList.toggle("active",!!p.outline);$("#shadowToggle").classList.toggle("active",!!p.shadow);$$(".grad").forEach(b=>b.classList.toggle("active",b.dataset.g===(p.gradient||[]).join("|")));$("#settingsOverlay").classList.add("open")
 }
 $("#heroEdit").onclick=openSettings;$("#closeSettings").onclick=()=>$("#settingsOverlay").classList.remove("open");$("#settingsCancel").onclick=()=>$("#settingsOverlay").classList.remove("open");
 $("#nameSize").oninput=()=>$("#sizeLabel").textContent=$("#nameSize").value+" px";$("#outlineToggle").onclick=()=>$("#outlineToggle").classList.toggle("active");$("#shadowToggle").onclick=()=>$("#shadowToggle").classList.toggle("active");
 $$(".grad").forEach(b=>b.onclick=()=>{$$(".grad").forEach(x=>x.classList.remove("active"));b.classList.add("active")});
-$("#settingsSave").onclick=()=>{let n=$("#editName").value.trim();if(n.length<2)return toast("El nombre debe tener al menos 2 caracteres");let grad=$(".grad.active")?.dataset.g.split("|")||me.gradient;me={...me,name:n,gradient:grad,color:$("#nameColor").value,size:+$("#nameSize").value,font:$("#fontSelect").value,outline:$("#outlineToggle").classList.contains("active"),shadow:$("#shadowToggle").classList.contains("active")};putProfile(me);viewUser=me;$("#settingsOverlay").classList.remove("open");applyProfile();toast("Banner actualizado")};
+$("#settingsSave").onclick=()=>{let n=$("#editName").value.trim();if(n.length<2)return toast("El nombre debe tener al menos 2 caracteres");let grad=$(".grad.active")?.dataset.g.split("|")||me.gradient;me={...me,name:n,gradient:grad,color:$("#nameColor").value,size:+$("#nameSize").value,font:$("#fontSelect").value,outline:$("#outlineToggle").classList.contains("active"),shadow:$("#shadowToggle").classList.contains("active"),avatar:pendingProfileAvatar};putProfile(me);viewUser=me;$("#settingsOverlay").classList.remove("open");applyProfile();toast("Banner actualizado")};
 $("#logoutBtn").onclick=()=>{
   if(!confirm("¿Reiniciar el usuario prototipo? Se generará otro nombre e ID, pero las cartas actuales seguirán asociadas al perfil anterior."))return;
   let list=profiles().map(p=>p.prototype?{...p,prototype:false}:p);
